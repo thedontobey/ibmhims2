@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Matex Secure Assessment Engine | Advanced Proctoring</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#fef2f2',
+              100: '#fee2e2',
+              500: '#ef4444',
+              600: '#dc2626',
+              700: '#b91c1c',
+              900: '#7f1d1d',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+    body { 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      user-select: none; 
+      -webkit-user-select: none; 
+      -moz-user-select: none; 
+      -ms-user-select: none; 
+    }
+    .glass-card {
+      background: rgba(18, 18, 22, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glow-red {
+      box-shadow: 0 0 40px -10px rgba(239, 68, 68, 0.25);
+    }
+  </style>
+</head>
+<body class="bg-black text-slate-100 min-h-screen flex flex-col selection:bg-brand-500 selection:text-white">
+
+  <!-- Background Ambient Glows -->
+  <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+    <div class="absolute -top-40 -left-40 w-96 h-96 bg-brand-600/10 rounded-full blur-[120px]"></div>
+    <div class="absolute top-1/2 -right-40 w-96 h-96 bg-red-900/10 rounded-full blur-[120px]"></div>
+  </div>
+
+  <!-- Top Navigation Header -->
+  <header class="relative z-10 border-b border-white/10 bg-black/40 backdrop-blur-md">
+    <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-lg shadow-brand-500/20">
+          <i class="fa-solid fa-shield-halved text-white text-lg"></i>
+        </div>
+        <div>
+          <span class="text-xs font-bold tracking-widest text-brand-500 uppercase">Matex Consultancy</span>
+          <h1 class="text-lg font-extrabold tracking-tight text-white">Secure Proctored Evaluation</h1>
+        </div>
+      </div>
+      <div id="header-status" class="hidden items-center space-x-4">
+        <div class="text-right">
+          <div class="text-xs text-slate-400">Progress</div>
+          <div id="header-progress" class="text-sm font-bold text-white">Question 1 of 30</div>
+        </div>
+        <div class="h-8 w-px bg-white/10"></div>
+        <div class="flex items-center space-x-2 bg-white/5 px-3 py-1.5 rounded-lg border border-white/10">
+          <i class="fa-solid fa-fire text-brand-500"></i>
+          <span id="header-score" class="text-sm font-bold">Score: 0</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="relative z-10 flex-1 flex items-center justify-center p-6 max-w-4xl mx-auto w-full">
+
+    <!-- VIEW 1: CANDIDATE REGISTRATION & SEED SELECTION -->
+    <div id="view-setup" class="w-full glass-card rounded-2xl p-8 md:p-10 glow-red transition-all duration-300">
+      <div class="max-w-2xl mx-auto">
+        <div class="inline-flex items-center space-x-2 bg-brand-500/10 border border-brand-500/20 px-3 py-1 rounded-full text-brand-400 text-xs font-semibold mb-6">
+          <i class="fa-solid fa-lock"></i>
+          <span>Secure Proctoring Active • Copy/Paste Disabled</span>
+        </div>
+        
+        <h2 class="text-3xl font-black tracking-tight text-white mb-3">Candidate Registration</h2>
+        <p class="text-slate-400 text-sm mb-8">
+          Enter your credentials, choose your starting seed number (1-6) to shuffle and rotate the question sequence, and launch the 30-question proctored evaluation.
+        </p>
+
+        <!-- Focus Warning Alert -->
+        <div id="focus-warning" class="hidden mb-6 p-4 rounded-xl bg-red-500/20 border border-red-500 text-red-200 text-xs flex items-center space-x-3">
+          <i class="fa-solid fa-triangle-exclamation text-lg text-brand-500"></i>
+          <span id="focus-warning-text">Warning: Please ensure this browser window is active and no other tabs or windows are open.</span>
+        </div>
+
+        <form id="quiz-form" class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold tracking-wider text-slate-300 uppercase mb-2">Full Name <span class="text-brand-500">*</span></label>
+              <input type="text" id="candidate-name" required placeholder="Suhas Mallikarjuna" 
+                class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-600 text-sm focus:outline-none focus:border-brand-500">
+            </div>
+            <div>
+              <label class="block text-xs font-bold tracking-wider text-slate-300 uppercase mb-2">Email Address <span class="text-brand-500">*</span></label>
+              <input type="email" id="candidate-email" required placeholder="suhas@matex.org" 
+                class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-600 text-sm focus:outline-none focus:border-brand-500">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold tracking-wider text-slate-300 uppercase mb-2">Course / Track <span class="text-brand-500">*</span></label>
+            <input type="text" id="candidate-course" required placeholder="Cybersecurity & AI Enterprise L&D" 
+              class="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-600 text-sm focus:outline-none focus:border-brand-500">
+          </div>
+
+          <!-- Seed Selection Grid (1 to 6) -->
+          <div>
+            <label class="block text-xs font-bold tracking-wider text-slate-300 uppercase mb-2">
+              Select Random Seed (1 - 6) <span class="text-brand-500">*</span>
+            </label>
+            <p class="text-xs text-slate-500 mb-3">Your choice determines the rotation offset of your 30 questions.</p>
+            <div class="grid grid-cols-6 gap-3" id="seed-selector">
+              <button type="button" data-seed="1" class="seed-btn py-3 rounded-xl bg-white/5 border border-white/10 text-white font-extrabold text-sm hover:border-brand-500 transition">1</button>
+              <button type="button" data-seed="2" class="seed-btn py-3 rounded-xl bg-white/5 border border-white/10 text-white font-extrabold text-sm hover:border-brand-500 transition">2</button>
+              <button type="button" data-seed="3" class="seed-btn py-3 rounded-xl bg-white/5 border border-white/10 text-white font-extrabold text-sm hover:border-brand-500 transition">3</button>
+              <button type="button" data-seed="4" class="seed-btn py-3 rounded-xl bg-white/5 border border-white/10 text-white font-extrabold text-sm hover:border-brand-500 transition">4</button>
+              <button type="button" data-seed="5" class="seed-btn py-3 rounded-xl bg-white/5 border border-white/10 text-white font-extrabold text-sm hover:border-brand-500 transition">5</button>
+              <button type="button" data-seed="6" class="seed-btn py-3 rounded-xl bg-white/5 border border-white/10 text-white font-extrabold text-sm hover:border-brand-500 transition">6</button>
+            </div>
+          </div>
+
+          <button type="submit" id="btn-start" disabled class="w-full py-4 bg-white/10 text-slate-500 font-bold rounded-xl cursor-not-allowed transition flex items-center justify-center space-x-3">
+            <i class="fa-solid fa-play text-lg"></i>
+            <span>Select a Seed Number to Begin Evaluation</span>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- VIEW 2: QUIZ ACTIVE SCREEN -->
+    <div id="view-quiz" class="hidden w-full glass-card rounded-2xl p-6 md:p-8 glow-red">
+      <div class="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
+        <div class="flex items-center space-x-3">
+          <span id="quiz-question-counter" class="text-xs font-black uppercase tracking-wider bg-white/10 px-3 py-1 rounded-lg text-slate-300">
+            Question 1 / 30
+          </span>
+          <span class="text-xs font-bold text-brand-400 bg-brand-500/10 border border-brand-500/20 px-3 py-1 rounded-lg">
+            Proctored Assessment
+          </span>
+        </div>
+
+        <div class="flex items-center space-x-3 bg-black/40 border border-white/10 px-4 py-1.5 rounded-xl">
+          <i id="timer-icon" class="fa-solid fa-stopwatch text-brand-500"></i>
+          <span id="timer-display" class="font-mono font-extrabold text-lg text-white">00:60</span>
+        </div>
+      </div>
+
+      <div class="w-full bg-white/10 rounded-full h-1.5 mb-6 overflow-hidden">
+        <div id="timer-bar" class="bg-brand-500 h-full w-full transition-all duration-1000 linear rounded-full"></div>
+      </div>
+
+      <h3 id="quiz-question-text" class="text-xl md:text-2xl font-bold text-white mb-6 leading-snug">
+        Loading question text...
+      </h3>
+
+      <div id="quiz-options" class="space-y-3 mb-8">
+        <!-- Option buttons dynamically injected here -->
+      </div>
+
+      <div class="flex items-center justify-between pt-4 border-t border-white/10">
+        <div class="text-xs text-slate-500">
+          <i class="fa-solid fa-shield mr-1"></i> Strict 60-second limit per question. Auto-advances.
+        </div>
+        <button id="btn-next" onclick="handleNextQuestion()" class="hidden px-6 py-3 bg-white text-black font-bold text-sm rounded-xl hover:bg-slate-200 transition flex items-center space-x-2">
+          <span>Next Question</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- VIEW 3: RESULTS SCREEN -->
+    <div id="view-results" class="hidden w-full glass-card rounded-2xl p-8 md:p-10 glow-red">
+      <div class="text-center max-w-xl mx-auto mb-8">
+        <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center mx-auto mb-6 shadow-xl shadow-brand-500/30">
+          <i class="fa-solid fa-award text-white text-3xl"></i>
+        </div>
+        <h2 class="text-3xl font-black text-white mb-2">Evaluation Results</h2>
+        <p id="candidate-result-meta" class="text-slate-400 text-sm">Performance summary for candidate.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div class="bg-white/5 border border-white/10 rounded-xl p-5 text-center">
+          <div class="text-xs text-slate-400 uppercase tracking-wider mb-1 font-bold">Final Score</div>
+          <div id="res-score" class="text-3xl font-black text-white">0 / 30</div>
+        </div>
+        <div class="bg-white/5 border border-white/10 rounded-xl p-5 text-center">
+          <div class="text-xs text-slate-400 uppercase tracking-wider mb-1 font-bold">Accuracy Rate</div>
+          <div id="res-percentage" class="text-3xl font-black text-brand-400">0%</div>
+        </div>
+        <div class="bg-white/5 border border-white/10 rounded-xl p-5 text-center">
+          <div class="text-xs text-slate-400 uppercase tracking-wider mb-1 font-bold">Status</div>
+          <div id="res-status" class="text-2xl font-black text-white">Passed</div>
+        </div>
+      </div>
+
+      <div class="mb-8">
+        <h4 class="text-sm font-bold uppercase tracking-wider text-slate-300 mb-4">Question Breakdown</h4>
+        <div id="res-review-list" class="space-y-4 max-h-96 overflow-y-auto pr-2"></div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="relative z-10 py-6 text-center text-xs text-slate-500 border-t border-white/10 bg-black/40 backdrop-blur-md">
+    Matex Consultancy Proctored Engine • Secure Assessment System
+  </footer>
+
+  <!-- Application Logic & Hardcoded 30 Questions -->
+  <script>
+    // 30 Comprehensive Hard Questions Bank
+    const MASTER_QUESTIONS = [
+      { q: "What is the primary architectural advantage of utilizing Supabase Row Level Security (RLS) over standard application-level filtering?", options: ["Faster JSON parsing speeds", "Database-enforced security policies directly at the SQL query execution layer", "Automatic SSL certificate generation", "Elimination of foreign key constraints"], correct: 1, explanation: "RLS enforces security policies directly in PostgreSQL, preventing unauthorized data access even if application code is bypassed." },
+      { q: "In modern Next.js App Router, what is the default rendering behavior for components within the app directory?", options: ["Client Components", "Server Components", "Hybrid Edge Components", "Static HTML generation exclusively"], correct: 1, explanation: "Next.js App Router defaults to React Server Components (RSC) to optimize initial page loads and reduce client bundle sizes." },
+      { q: "Which cryptographic hashing algorithm is currently considered industry standard for secure password salting and hashing?", options: ["MD5", "SHA-1", "Argon2 / bcrypt", "DES"], correct: 2, explanation: "Argon2 and bcrypt are specifically designed to be memory-hard and computationally expensive, thwarting GPU-based brute-force attacks." },
+      { q: "When implementing JWT (JSON Web Tokens), what is the primary risk of storing tokens in standard browser localStorage?", options: ["Tokens expire too quickly", "Vulnerability to Cross-Site Scripting (XSS) extraction", "Cookies cannot be read by JavaScript", "Network bandwidth exhaustion"], correct: 1, explanation: "Any malicious script injected via XSS can access localStorage and exfiltrate JWT tokens, whereas HttpOnly cookies mitigate this." },
+      { q: "What does CORS (Cross-Origin Resource Sharing) primarily restrict in web browsers?", options: ["Server CPU utilization", "Unauthenticated DNS lookups", "Malicious cross-origin API requests initiated by scripts", "Database indexing speed"], correct: 2, explanation: "CORS is a security mechanism built into browsers to restrict web pages from making requests to a different domain than the one serving the web page." },
+      { q: "In containerized environments like Docker, what is the purpose of multi-stage builds?", options: ["To run multiple operating systems simultaneously", "To reduce final container image size by discarding build-time dependencies", "To accelerate network card packet routing", "To bypass firewall restrictions"], correct: 1, explanation: "Multi-stage builds allow developers to use multiple FROM instructions in a Dockerfile, copying only production artifacts into the final slim image." },
+      { q: "Which HTTP status code signifies that the request has been successfully processed and a new resource has been created?", options: ["200 OK", "201 Created", "204 No Content", "302 Found"], correct: 1, explanation: "201 Created indicates that the request resulted in one or more new resources being successfully created on the server." },
+      { q: "What is the primary function of an API Gateway in microservices architecture?", options: ["Storing relational database records", "Acting as a single reverse proxy entry point for routing, rate limiting, and auth", "Executing client-side React hooks", "Replacing DNS servers"], correct: 1, explanation: "An API Gateway centralizes cross-cutting concerns like request routing, authentication, SSL termination, and rate limiting." },
+      { q: "In database normalization, what does 3NF (Third Normal Form) eliminate?", options: ["Repeating groups", "Partial functional dependencies", "Transitive functional dependencies", "Primary key duplication"], correct: 2, explanation: "3NF eliminates transitive dependencies where non-key attributes depend on other non-key attributes." },
+      { q: "What is the main advantage of asynchronous programming using async/await in JavaScript?", options: ["Multithreading execution across CPU cores", "Preventing UI blocking during I/O operations", "Automatic memory garbage collection", "Enforcing strict type checking"], correct: 1, explanation: "Async/await allows non-blocking execution of asynchronous operations like network fetches while keeping the single-threaded event loop responsive." },
+      { q: "Which OSI model layer is responsible for reliable end-to-end data delivery and flow control (e.g., TCP)?", options: ["Data Link Layer (Layer 2)", "Network Layer (Layer 3)", "Transport Layer (Layer 4)", "Application Layer (Layer 7)"], correct: 2, explanation: "Layer 4 (Transport Layer) manages end-to-end communication, reliability, flow control, and error recovery via TCP or UDP." },
+      { q: "What is the primary purpose of a Content Security Policy (CSP) header?", options: ["Encrypting traffic in transit", "Mitigating Cross-Site Scripting (XSS) and data injection attacks", "Caching static assets on CDN", "Managing database connection pools"], correct: 1, explanation: "CSP allows site operators to restrict the resources (such as JavaScript, CSS, Images) that the browser is allowed to load for a given page." },
+      { q: "In Git version control, what is the difference between `git merge` and `git rebase`?", options: ["Merge rewrites history, rebase creates merge commits", "Merge combines branches with a commit node, rebase replays commits sequentially onto another base", "Rebase deletes branches permanently", "There is no functional difference"], correct: 1, explanation: "Merge preserves complete history with a merge commit, whereas rebase linearizes history by moving or combining a sequence of commits." },
+      { q: "What is a major security vulnerability associated with improper SQL string concatenation?", options: ["Buffer Overflow", "SQL Injection (SQLi)", "Cross-Site Request Forgery", "Man-in-the-Middle Attack"], correct: 1, explanation: "Concatenating user input directly into SQL queries allows attackers to manipulate query logic and execute arbitrary database commands." },
+      { q: "Which Tailwind CSS utility prefix is used to target responsive breakpoints for medium screens (>= 768px)?", options: ["sm:", "md:", "lg:", "xl:"], correct: 1, explanation: "The `md:` prefix in Tailwind applies styles at the medium breakpoint (768px and wider)." },
+      { q: "What is the purpose of database indexing?", options: ["To encrypt sensitive column data", "To drastically speed up data retrieval queries at the cost of write performance", "To automatically backup tables", "To normalize tables into 3NF"], correct: 1, explanation: "Indexes provide rapid lookup paths for data rows, trading off disk space and write speed for faster read queries." },
+      { q: "In asynchronous web architecture, what is a WebSocket used for?", options: ["One-way HTTP polling", "Persistent, full-duplex bi-directional communication over a single TCP connection", "Stateless file uploads", "DNS resolution"], correct: 1, explanation: "WebSockets establish persistent real-time connections allowing both server and client to push messages instantly." },
+      { q: "What does the acronym ACID stand for in database management systems?", options: ["Atomicity, Consistency, Isolation, Durability", "Asynchronous, Centralized, Indexed, Distributed", "Authentication, Cryptography, Integrity, Delivery", "Array, Collection, Iteration, Dictionary"], correct: 0, explanation: "ACID properties guarantee reliable transaction processing in database systems." },
+      { q: "What is the role of a reverse proxy server?", options: ["Directing client requests to backend servers while hiding their details and handling SSL", "Caching client DNS records locally", "Compiling TypeScript code", "Serving as the primary database storage engine"], correct: 0, explanation: "Reverse proxies sit in front of backend servers, providing load balancing, SSL termination, caching, and security shielding." },
+      { q: "Which vulnerability allows an attacker to force an authenticated user to execute unwanted actions on a web application?", options: ["CSRF (Cross-Site Request Forgery)", "SQL Injection", "Denial of Service", "Phishing"], correct: 0, explanation: "CSRF tricks a victim into executing unwanted actions on an application in which they are currently authenticated." },
+      { q: "What is tree shaking in modern JavaScript bundlers (like Vite or Webpack)?", options: ["Removing dead/unused code from final bundles", "Minifying variable names", "Compressing PNG images", "Encrypting source maps"], correct: 0, explanation: "Tree shaking is a dead-code elimination technique that removes unused exports from final production bundles." },
+      { q: "What is the primary purpose of rate limiting on API endpoints?", options: ["To increase server latency", "To prevent brute-force attacks, DDoS, and API abuse", "To compress JSON payloads", "To format database timestamps"], correct: 1, explanation: "Rate limiting restricts the number of requests a user or IP can make in a given timeframe to protect server resources." },
+      { q: "What is a symbolic link (symlink) in file systems?", options: ["A file that points to another file or directory", "An encrypted archive", "A backup database snapshot", "A compiled binary executable"], correct: 0, explanation: "A symlink is a shortcut pointing to another file or directory path in the operating system." },
+      { q: "Which HTTP method is idempotent and used to update or replace an existing resource completely?", options: ["POST", "PUT", "PATCH", "GET"], correct: 1, explanation: "PUT is idempotent and replaces the target resource entirely with the request payload." },
+      { q: "What is the function of an SSL/TLS handshake?", options: ["To establish an encrypted and authenticated communication channel", "To compress HTML files", "To check user grammar", "To verify credit card validity"], correct: 0, explanation: "The TLS handshake negotiates encryption algorithms, exchanges keys, and verifies server identity before secure data transmission." },
+      { q: "What is a race condition in software development?", options: ["A competition between frontend frameworks", "An undesirable situation where system behavior depends on the relative timing of uncontrollable events", "A speed benchmark test", "A network bandwidth test"], correct: 1, explanation: "Race conditions occur when multiple threads or processes access shared resources concurrently without proper synchronization." },
+      { q: "What is the main benefit of server-side pagination over client-side pagination?", options: ["Reduces network payload and memory overhead by fetching only requested chunks", "Looks visually superior", "Requires no database setup", "Eliminates CSS styling requirements"], correct: 0, explanation: "Server-side pagination fetches only the requested page of data, preventing massive data transfers for large datasets." },
+      { q: "What is the core purpose of a Dockerfile?", options: ["To document team meetings", "To define instructions for building a Docker container image", "To configure DNS routing", "To manage user accounts"], correct: 1, explanation: "A Dockerfile contains all the commands a user could call on the command line to assemble an image." },
+      { q: "What is a JSON Web Token (JWT) signature used for?", options: ["Encrypting the payload data", "Verifying that the token content has not been tampered with", "Compressing token size", "Storing user passwords"], correct: 1, explanation: "JWT signatures ensure integrity by verifying that the sender of the JWT is who it says it is and that the message wasn't changed." },
+      { q: "In software architecture, what does 'separation of concerns' (SoC) mean?", options: ["Keeping developers in separate rooms", "Dividing a computer program into distinct sections so each addresses a separate concern", "Using multiple programming languages in one file", "Running tests on remote servers"], correct: 1, explanation: "SoC is a design principle for separating a computer program into distinct sections, maximizing maintainability and modularity." }
+    ];
+
+    let selectedSeed = null;
+    let candidateInfo = { name: '', email: '', course: '' };
+    let quizData = [];
+    let currentIdx = 0;
+    let score = 0;
+    let userAnswers = [];
+    let timerInterval = null;
+    let timeLeft = 60;
+    let isQuizActive = false;
+
+    // Strict Anti-Cheat & Proctoring Enforcement
+    let blurCount = 0;
+    window.addEventListener('blur', () => {
+      if (!isQuizActive) return;
+      blurCount++;
+      const warningEl = document.getElementById('focus-warning');
+      const warningText = document.getElementById('focus-warning-text');
+      warningEl.classList.remove('hidden');
+      warningText.textContent = `Proctoring Alert #${blurCount}: Loss of window focus detected! Please keep this tab active.`;
+    });
+
+    // Disable copy, cut, paste, selection, and context menu
+    document.addEventListener('copy', (e) => { e.preventDefault(); alert('Copying content is disabled during proctored evaluation.'); });
+    document.addEventListener('cut', (e) => { e.preventDefault(); });
+    document.addEventListener('paste', (e) => { e.preventDefault(); });
+    document.addEventListener('contextmenu', (e) => { e.preventDefault(); });
+
+    // Seed Selection Logic (1-6)
+    const seedBtns = document.querySelectorAll('.seed-btn');
+    seedBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        seedBtns.forEach(b => b.classList.remove('border-brand-500', 'bg-brand-500/20', 'text-brand-400'));
+        btn.classList.add('border-brand-500', 'bg-brand-500/20', 'text-brand-400');
+        selectedSeed = parseInt(btn.getAttribute('data-seed'));
+        
+        const startBtn = document.getElementById('btn-start');
+        startBtn.disabled = false;
+        startBtn.className = "w-full py-4 bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-500 hover:to-brand-600 text-white font-bold rounded-xl shadow-lg shadow-brand-600/30 transition transform active:scale-[0.99] flex items-center justify-center space-x-3 cursor-pointer";
+        startBtn.innerHTML = `<i class="fa-solid fa-play text-lg"><span>Start Proctored Evaluation (Seed ${selectedSeed})</span></i>`;
+      });
+    });
+
+    // Form Submission & Shuffling Algorithm based on Seed
+    document.getElementById('quiz-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!selectedSeed) {
+        alert('Please choose a seed number (1-6) to shuffle questions.');
+        return;
+      }
+
+      candidateInfo.name = document.getElementById('candidate-name').value.trim();
+      candidateInfo.email = document.getElementById('candidate-email').value.trim();
+      candidateInfo.course = document.getElementById('candidate-course').value.trim();
+
+      // Shuffle & Rotate 30 questions based on seed offset
+      // e.g. seed 1 starts from index 0 (Q1), seed 2 starts from index 3 (Q4), etc.
+      let offset = (selectedSeed - 1) * 3; // 0, 3, 6, 9, 12, 15
+      let baseList = [...MASTER_QUESTIONS];
+      
+      // Rotate array items based on offset
+      quizData = baseList.slice(offset).concat(baseList.slice(0, offset));
+
+      currentIdx = 0;
+      score = 0;
+      userAnswers = [];
+      isQuizActive = true;
+
+      document.getElementById('view-setup').classList.add('hidden');
+      document.getElementById('view-quiz').classList.remove('hidden');
+      
+      const headerStatus = document.getElementById('header-status');
+      headerStatus.classList.remove('hidden');
+      headerStatus.classList.add('flex');
+
+      loadQuestion();
+    });
+
+    function loadQuestion() {
+      if (currentIdx >= quizData.length) {
+        finishQuiz();
+        return;
+      }
+
+      const q = quizData[currentIdx];
+      document.getElementById('quiz-question-counter').textContent = `Question ${currentIdx + 1} / ${quizData.length}`;
+      document.getElementById('header-progress').textContent = `Question ${currentIdx + 1} of ${quizData.length}`;
+      document.getElementById('header-score').textContent = `Score: ${score}`;
+      document.getElementById('quiz-question-text').textContent = q.q;
+
+      const optionsContainer = document.getElementById('quiz-options');
+      optionsContainer.innerHTML = '';
+
+      q.options.forEach((opt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'w-full text-left p-4 rounded-xl bg-white/5 border border-white/10 hover:border-brand-500 hover:bg-white/10 transition font-medium text-sm flex items-center justify-between group';
+        btn.innerHTML = `
+          <span class="flex items-center space-x-3">
+            <span class="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center text-xs font-bold text-slate-300 group-hover:bg-brand-500 group-hover:text-white transition">${String.fromCharCode(65 + idx)}</span>
+            <span class="text-slate-200">${opt}</span>
+          </span>
+          <i class="fa-solid fa-chevron-right text-slate-600 group-hover:text-brand-400 transition"></i>
+        `;
+        btn.onclick = () => selectAnswer(idx);
+        optionsContainer.appendChild(btn);
+      });
+
+      document.getElementById('btn-next').classList.add('hidden');
+      startTimer();
+    }
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      timeLeft = 60;
+      updateTimerDisplay();
+
+      const timerBar = document.getElementById('timer-bar');
+      timerBar.style.transition = 'none';
+      timerBar.style.width = '100%';
+      void timerBar.offsetWidth;
+      timerBar.style.transition = 'width 1s linear';
+
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        updateTimerDisplay();
+
+        const pct = (timeLeft / 60) * 100;
+        timerBar.style.width = pct + '%';
+
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          handleTimeout();
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const display = document.getElementById('timer-display');
+      display.textContent = `00:${timeLeft < 10 ? '0' : ''}${timeLeft}`;
+      if (timeLeft <= 10) {
+        display.classList.add('text-brand-500');
+      } else {
+        display.classList.remove('text-brand-500');
+      }
+    }
+
+    function selectAnswer(selectedIndex) {
+      clearInterval(timerInterval);
+      const q = quizData[currentIdx];
+      const isCorrect = selectedIndex === q.correct;
+
+      if (isCorrect) score++;
+
+      userAnswers.push({
+        question: q.q,
+        options: q.options,
+        correctIndex: q.correct,
+        selectedIndex: selectedIndex,
+        explanation: q.explanation,
+        isCorrect: isCorrect
+      });
+
+      highlightAnswers(selectedIndex);
+    }
+
+    function handleTimeout() {
+      const q = quizData[currentIdx];
+      userAnswers.push({
+        question: q.q,
+        options: q.options,
+        correctIndex: q.correct,
+        selectedIndex: -1,
+        explanation: q.explanation,
+        isCorrect: false
+      });
+
+      highlightAnswers(-1);
+    }
+
+    function highlightAnswers(selectedIndex) {
+      const q = quizData[currentIdx];
+      const buttons = document.getElementById('quiz-options').children;
+
+      for (let i = 0; i < buttons.length; i++) {
+        buttons[i].disabled = true;
+        buttons[i].classList.remove('hover:border-brand-500', 'hover:bg-white/10');
+        
+        if (i === q.correct) {
+          buttons[i].className = 'w-full text-left p-4 rounded-xl bg-emerald-500/20 border border-emerald-500 text-white font-medium text-sm flex items-center justify-between';
+          buttons[i].querySelector('span span').className = 'w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center text-xs font-bold';
+        } else if (i === selectedIndex && !q.isCorrect) {
+          buttons[i].className = 'w-full text-left p-4 rounded-xl bg-red-500/20 border border-red-500 text-white font-medium text-sm flex items-center justify-between';
+          buttons[i].querySelector('span span').className = 'w-7 h-7 rounded-lg bg-red-500 text-white flex items-center justify-center text-xs font-bold';
+        } else {
+          buttons[i].className = 'w-full text-left p-4 rounded-xl bg-white/5 border border-white/10 opacity-50 text-slate-400 font-medium text-sm flex items-center justify-between';
+        }
+      }
+
+      document.getElementById('btn-next').classList.remove('hidden');
+    }
+
+    function handleNextQuestion() {
+      currentIdx++;
+      loadQuestion();
+    }
+
+    function finishQuiz() {
+      isQuizActive = false;
+      document.getElementById('view-quiz').classList.add('hidden');
+      document.getElementById('view-results').classList.remove('hidden');
+      document.getElementById('header-status').classList.remove('flex');
+      document.getElementById('header-status').classList.add('hidden');
+
+      const total = quizData.length;
+      const pct = Math.round((score / total) * 100);
+
+      document.getElementById('candidate-result-meta').textContent = `Candidate: ${candidateInfo.name} (${candidateInfo.email}) • Course: ${candidateInfo.course} • Seed: ${selectedSeed}`;
+      document.getElementById('res-score').textContent = `${score} / ${total}`;
+      document.getElementById('res-percentage').textContent = `${pct}%`;
+
+      const statusEl = document.getElementById('res-status');
+      if (pct >= 70) {
+        statusEl.textContent = 'Certified Pass';
+        statusEl.className = 'text-2xl font-black text-emerald-400';
+      } else {
+        statusEl.textContent = 'Did Not Pass';
+        statusEl.className = 'text-2xl font-black text-brand-400';
+      }
+
+      const reviewList = document.getElementById('res-review-list');
+      reviewList.innerHTML = '';
+
+      userAnswers.forEach((ans, idx) => {
+        const item = document.createElement('div');
+        item.className = `p-4 rounded-xl border ${ans.isCorrect ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-red-500/5 border-red-500/20'}`;
+        
+        let userAnsText = ans.selectedIndex === -1 ? 'Timed Out (No Answer)' : ans.options[ans.selectedIndex];
+        let correctAnsText = ans.options[ans.correctIndex];
+
+        item.innerHTML = `
+          <div class="flex items-start justify-between mb-2">
+            <span class="text-xs font-bold text-slate-400">Question ${idx + 1}</span>
+            <span class="text-xs font-bold px-2 py-0.5 rounded ${ans.isCorrect ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}">
+              ${ans.isCorrect ? 'Correct' : 'Incorrect'}
+            </span>
+          </div>
+          <div class="text-sm font-bold text-white mb-2">${ans.question}</div>
+          <div class="text-xs space-y-1 mb-2">
+            <div class="${ans.isCorrect ? 'text-emerald-400' : 'text-red-400'}"><strong class="text-slate-300">Your Answer:</strong> ${userAnsText}</div>
+            ${!ans.isCorrect ? `<div class="text-emerald-400"><strong class="text-slate-300">Correct Answer:</strong> ${correctAnsText}</div>` : ''}
+          </div>
+          <div class="text-xs text-slate-400 bg-black/30 p-2.5 rounded-lg border border-white/5">
+            <strong>Explanation:</strong> ${ans.explanation}
+          </div>
+        `;
+        reviewList.appendChild(item);
+      });
+    }
+  </script>
+</body>
+</html>
